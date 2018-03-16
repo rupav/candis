@@ -112,6 +112,7 @@ class CData(object):
 
     def toARFF(self, path, express_config = { }, verbose = False):
         # NOTE - This is assuming a single !cel input vector only.
+        paths = []
         for column in self.data.columns:
             if any(tag in column for tag in ('!cel')):
                 paths = list(self.data[column])
