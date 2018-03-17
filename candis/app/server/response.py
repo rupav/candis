@@ -45,7 +45,7 @@ class Response(object):
     def set_error(self, error, messages = [ ]):
         self.status  = Response.Status.ERROR
         self.error   = error
-        self.code    = self.error.code
+        self.code    = self.error.code   #assuming self.error=error is a dictionary with `code` as a key in it.
 
         if  messages:
             if isinstance(messages, str):
