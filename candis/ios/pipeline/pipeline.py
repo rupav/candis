@@ -24,34 +24,36 @@ from weka.classifiers         import Classifier, Evaluation
 from weka.plot.classifiers    import plot_classifier_errors, plot_learning_curve, plot_roc, plot_prc
 
 # imports - module imports
-from candis.config import CONFIG
-from candis.ios    import cdata
+from candis.config import CONFIG          #loading config.yml
+from candis.ios    import cdata     
 from candis.ios    import pipeline
 from candis.ios    import json as JSON
 from candis.util   import assign_if_none, get_rand_uuid_str, get_b64_plot, buffer_to_b64
 
 pplt.style.use('seaborn')
 
+#(object) indicates special classes instead of classical ones... not required to declare in python3
 class Pipeline(object):
-    CONFIG   = CONFIG.Pipeline
-
+    CONFIG   = CONFIG.Pipeline            # Key is Pipeline in config.yaml
+    
     PENDING  = 'PENDING'
     READY    = 'READY'
     RUNNING  = 'RUNNING'
     COMPLETE = 'COMPLETE'
 
+    #constructor for an object of the class Pipeline
     def __init__(self, config = { }):
-        self.status  = Pipeline.PENDING
-        self.config  = Pipeline.CONFIG
+        self.status  = Pipeline.PENDING   # default status is `PENDING`
+        self.config  = Pipeline.CONFIG    # Pipeline key in config.yaml
         self.thread  = None
-        self.logs    = [ ]
-        self.stages  = [ ]
-        self.gist    = addict.Dict()
+        self.logs    = [ ]                
+        self.stages  = [ ]                # List: pipeline stages
+        self.gist    = addict.Dict()      # dictionary type
 
-        self.set_config(config)
+        self.set_config(config)         
 
     def set_config(self, config):
-        self.config.update(config)
+        self.config.update(config)        # using update function in candis/config/config.py ?
 
     def set_status(self, status):
         self.status  = status
@@ -74,8 +76,8 @@ class Pipeline(object):
         if not os.path.isfile(path):
             raise IOError('{path} is not a valid file.'.format(path = path))
 
-        objekt       = Pipeline()
-        stages       = [addict.Dict(stage) for stage in pipeline.read(path)]
+        objekt       = Pipeline()         # class Pipeline object/instance inintialized with __init__ function (default config)
+        stages       = [addict.Dict(stage) for stage in pipeline.read(path)]   # candis/ios/pipeline/reader.py read function: json.load(path)
 
         if len(stages) == 0:
             raise ValueError('Pipeline is empty.')
@@ -93,7 +95,7 @@ class Pipeline(object):
             raise ValueError('Resource pending.')
 
         dpath        = os.path.join(fpath.value.path, fpath.value.name)
-        data         = cdata.read(dpath)
+        data         = cdata.read(dpath)  # calls ios/cdata/reader.py read function which calls 'load' function of CData class return cdat!
         fpath.status = Pipeline.READY
         objekt.add_stages(fpath)
 
