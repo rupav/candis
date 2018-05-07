@@ -15,8 +15,9 @@ const write              = (output, buffer = null) => {
       const action       = successWrite(output, buffer, data)
 
       dispatch(action)
-    }).catch(({ response }) => {
-      const error        = response.data.error
+    }).catch((error) => {
+      console.log(error)
+      // const error        = response.data.error
       const action       = errorWrite(output, buffer, error)
 
       dispatch(action)

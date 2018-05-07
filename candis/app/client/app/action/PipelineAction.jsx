@@ -60,6 +60,15 @@ const pipeline     =
 		}
 
 		return action
+	},
+	delete: () => {
+		const dispatch = (dispatch) => {
+			const action = {
+				type: ActionType.Pipeline.DELETE_PIPELINE,
+			}
+			dispatch(action)
+		}
+		return dispatch
 	}
 }
 
