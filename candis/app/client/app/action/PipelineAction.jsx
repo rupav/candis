@@ -64,7 +64,6 @@ const pipeline     =
 	delete: (activePipe) => {
 		const dispatch = (dispatch) => {
 			axios.post(config.routes.API.data.delete, { name: activePipe }).then(({data}) => {
-				data = data.data
 				console.log(data)
 			}).catch((error) => {
 				console.log('error', error)
