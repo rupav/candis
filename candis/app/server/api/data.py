@@ -213,8 +213,21 @@ def write(output = { 'name': '', 'path': '', 'format': None }):
 
 @app.route(CONFIG.App.Routes.API.Data.DELETE, methods = ['POST'])
 def delete():
-    # response = Response()
+    # delete handle to delete a pipeline
+    response = Response()
     parameters   = addict.Dict(request.get_json())
     opath        = os.path.join(ABSPATH_STARTDIR, parameters.name)  # parameter.name is expected to be name of the pipeline.
-    os.remove(opath)
-    return '200'
+    if os.path.isfile(opath):
+        try:
+            os.remove(opath)
+        except:
+            response.set_error(Response.Error.UNPROCESSABLE_ENTITY, 'Write access denied!')
+    else:
+        response.set_error(Response.Error.NOT_FOUND, 'File does not exist.')
+    
+    dict_ = response.to_dict()
+    json_ = jsonify(dict_)
+    code = response.code
+
+    return json_, code
+
