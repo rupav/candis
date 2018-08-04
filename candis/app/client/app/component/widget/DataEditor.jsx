@@ -9,6 +9,7 @@ import ToolBar        from './ToolBar'
 import { row, column } from '../../action/DataEditorAction'
 import { getResource } from '../../action/AsynchronousAction'
 import { getFiles }    from '../../util'
+import store from '../../Store';
 
 class DataEditor extends React.Component {
   constructor (props) {
@@ -25,9 +26,7 @@ class DataEditor extends React.Component {
 
           props.columns.forEach((column) => { meta[column.key] = "" })
 
-          const action = row.insert(position, meta)
-
-          props.dispatch(action)
+          props.row.insert(position, meta)
         }
       },
       {
@@ -47,9 +46,8 @@ class DataEditor extends React.Component {
             callback: (name) => {
               const meta     = { key: name, name: name, editable: true }
               const position = props.columns.length - 1
-              const action   = column.insert(position, meta)
-              
-              props.dispatch(action)
+
+              props.column.insert(position, meta)
             }
           })
           
@@ -61,9 +59,8 @@ class DataEditor extends React.Component {
         onClick: (props) => {
           props.rows.forEach((meta, index) => {
             if ( meta.selected ) {
-              const action = row.delete(index, meta)
 
-              props.dispatch(action)
+              props.row.delete(index, meta)
             }
           })
         }
@@ -89,9 +86,7 @@ class DataEditor extends React.Component {
                 animate: false,
                 callback: (key) => {
                   if ( key  !== null ) {
-                    const action = column.delete(key)
-
-                    props.dispatch(action)
+                    props.column.delete(key)
                   }
                 }
           })
@@ -101,9 +96,7 @@ class DataEditor extends React.Component {
            icon: `${config.routes.icons}/reload.png`,
         tooltip: 'Refresh',
         onClick: (props) => {
-          const action = getResource()
-
-          props.dispatch(action)
+          props.getResource()
         }
       },
       {
@@ -141,26 +134,27 @@ class DataEditor extends React.Component {
                    enableShiftSelect: true,
                       onRowsSelected: (rows) => {
                         rows.forEach((meta)  => {
-                          const action = row.select(meta.rowIdx, meta.row)
 
-                          props.dispatch(action)
+                          props.row.select(meta.rowIdx, meta.row)
                         })
                       },
                     onRowsDeselected: (rows) => {
                       rows.forEach((meta)  => {
-                        const action = row.deselect(meta.rowIdx, meta.row)
 
-                        props.dispatch(action)
+                        props.row.deselect(meta.rowIdx, meta.row)
                       })
                     },
                             selectBy: { isSelectedKey: 'selected' }
                  }}
             onGridRowsUpdated={({ fromRow, toRow, updated }) => {
-              const action = row.update(fromRow, toRow, updated)
-
-              props.dispatch(action)
-
-              props.onChange({ columns: props.columns, rows: props.rows })
+              
+              props.row.update(fromRow, toRow, updated).then(() => {
+                
+                console.log("props.rows are now!", props.rows)  // Still not updated
+                // store.getState().dataEditor.rows  // this statement have updated rows, even without using the Promise.
+                
+                props.onChange({ columns: props.columns, rows: props.rows })
+              })
             }}/>
           </div>
       </div>
@@ -177,4 +171,46 @@ const mapStateToProps = (state) => {
   }
 }
 
-export default connect(mapStateToProps)(DataEditor)
+const mapDispatchToProps = (dispatch) => {
+  return {
+    row: {
+      update: (fromRow, toRow, updated) => new Promise ((resolve) => {
+        const action = row.update(fromRow, toRow, updated)
+        dispatch(action)
+        resolve()
+      }),
+      insert: (position, meta)=> {
+        const action = row.insert(position, meta)
+        dispatch(action)
+      },
+      delete: (index, meta)=> {
+        const action = row.delete(index, meta)
+        dispatch(action)
+      },
+      select: (rowIdx, row) => {
+        const action = row.select(rowIdx, row)
+        dispatch(action)
+      },
+      deselect: (rowIdx, row) => {
+        const action = row.deselect(rowIdx, row)
+        dispatch(action)
+      }
+    },
+    column: {
+      insert: (position, meta)=> {
+        const action = column.insert(position, meta)
+        dispatch(action)
+      },
+      delete: (key)=> {
+        const action = column.delete(key)
+        dispatch(action)
+      }
+    },
+    getResource: () => {
+      const action = getResource()
+      dispatch(action)
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(DataEditor)
