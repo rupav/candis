@@ -179,6 +179,7 @@ app:
         delete: !relurljoin [*base, "api", "data", "delete"]
         search: !relurljoin [*base, "api", "data", "search"]
         download: !relurljoin [*base, "api", "data", "download"]
+        extract: !relurljoin [*base, "api", "data", "extract"]
       preprocess:
         methods: !relurljoin [*base, "api", "preprocess", "methods"]
       featselect:

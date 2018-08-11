@@ -2,6 +2,7 @@
 import os
 import json
 import time
+import tarfile
 from datetime import datetime
 
 # imports - third-party imports
@@ -449,6 +450,35 @@ def download():
     
     response.set_data(addict.Dict(download_path = download_path))
     
+    dict_ = response.to_dict()
+    save_response_to_db(dict_)
+    json_ = jsonify(dict_)
+    code = response.code
+    
+    return  json_, code
+
+@app.route(CONFIG.App.Routes.API.Data.EXTRACT, methods = ['POST'])
+def extract():
+    response = Response()
+    parameters = addict.Dict(request.get_json())
+
+    decoded_token = jwt.decode(request.headers.get('token'), app.config['SECRET_KEY'])
+    username = decoded_token['username']
+    data_path = os.path.join(CONFIG.App.DATADIR, modify_data_path(username))
+    if parameters.tarfile:
+        tpath = os.path.join(data_path, parameters.tarfile)
+        if os.path.exists(tpath):
+            if tarfile.is_tarfile(tpath):
+                tar = tarfile.open(tpath)
+                tar.extractall()
+                tar.close()
+            else:
+                response.set_error()
+        else:
+            response.set_error()
+    else:
+        response.set_error()
+
     dict_ = response.to_dict()
     save_response_to_db(dict_)
     json_ = jsonify(dict_)
