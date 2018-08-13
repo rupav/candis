@@ -156,11 +156,19 @@ class DataEditor extends React.Component {
                             selectBy: { isSelectedKey: 'selected' }
                  }}
             onGridRowsUpdated={({ fromRow, toRow, updated }) => {
-              const action = row.update(fromRow, toRow, updated)
+              
+              const update = (fromRow, toRow, updated) => () => {
+                return new Promise( ( resolve ) => {
+                  const action = row.update(fromRow, toRow, updated)
 
-              props.dispatch(action)
-
-              props.onChange({ columns: props.columns, rows: props.rows })
+                  props.dispatch(action)
+                  resolve()
+                })
+              }
+              
+              update.then(() => {
+                props.onChange({ columns: props.columns, rows: props.rows })
+              })
             }}/>
           </div>
       </div>
