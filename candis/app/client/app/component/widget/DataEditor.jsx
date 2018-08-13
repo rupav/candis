@@ -157,7 +157,7 @@ class DataEditor extends React.Component {
                  }}
             onGridRowsUpdated={({ fromRow, toRow, updated }) => {
               
-              const update = (fromRow, toRow, updated) => () => {
+              const update = (fromRow, toRow, updated) => {
                 return new Promise( ( resolve ) => {
                   const action = row.update(fromRow, toRow, updated)
 
@@ -166,7 +166,7 @@ class DataEditor extends React.Component {
                 })
               }
               
-              update.then(() => {
+              update(fromRow, toRow, updated).then(() => {
                 props.onChange({ columns: props.columns, rows: props.rows })
               })
             }}/>
